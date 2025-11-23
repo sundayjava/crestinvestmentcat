@@ -1,0 +1,274 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INVESTMENT
+  PROFIT
+  ADMIN_ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum AssetType {
+  GOLD
+  SILVER
+  CRYPTO
+  STOCKS
+  REAL_ESTATE
+  BONDS
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          UserRole  @default(USER)
+  emailVerified Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  balance       Float     @default(0)
+  
+  // Contact Information
+  phone         String?
+  
+  // Company/Business Details
+  company       String?
+  
+  // Address Information
+  address       String?
+  province      String?
+  city          String?
+  postalCode    String?
+  country       String?   @default("South Africa")
+  
+  // Investment Profile
+  investorType  String?   // e.g., "Individual", "Corporate", "Institutional"
+  investableAssets String? // e.g., "Under $10k", "$10k-$50k", "$50k-$100k", "$100k+"
+  
+  // Marketing
+  referralSource String?  // How did you hear about us
+  comments      String?   @db.Text
+  
+  // Dime Bank Account Details
+  hasDimeAccount Boolean  @default(false)
+  dimeBankAccountNumber String?
+  dimeBankAccountName   String?
+  dimeBankDetails       Json?    // Additional details
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  investments   Investment[]
+  transactions  Transaction[]
+  withdrawals   Withdrawal[]
+  otps          OTP[]
+  notifications Notification[]
+  
+  @@index([email])
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([code])
+}
+
+model Asset {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  symbol      String     @unique
+  type        AssetType
+  description String?
+  currentPrice Float
+  minInvestment Float    @default(10)
+  imageUrl    String?
+  isActive    Boolean    @default(true)
+  
+  // Benefits array for marketing
+  benefits    Json?      // Array of benefit strings
+  
+  // Price history for charts
+  priceHistory Json?    // Array of {timestamp, price}
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Relations
+  investments Investment[]
+  
+  @@index([symbol])
+  @@index([type])
+}
+
+model Investment {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetId         String
+  asset           Asset    @relation(fields: [assetId], references: [id])
+  
+  amount          Float
+  quantity        Float    // Amount of asset units purchased
+  purchasePrice   Float    // Price at time of purchase
+  currentValue    Float    // Current value (auto-updated)
+  profitLoss      Float    @default(0)
+  
+  depositProof    String?  // URL to deposit proof image
+  depositMethod   String?  // USDT, Bank Transfer, etc.
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([assetId])
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  amount      Float
+  
+  // Additional details
+  description String?
+  metadata    Json?             // Flexible field for extra data
+  receiptUrl  String?           // URL to receipt PDF/image
+  
+  // Admin fields
+  processedBy String?           // Admin user ID
+  adminNotes  String?
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
+model Withdrawal {
+  id                String           @id @default(cuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount            Float
+  status            WithdrawalStatus @default(PENDING)
+  
+  // User's Dime Bank Details for withdrawal
+  dimeBankAccountNumber String
+  dimeBankAccountName   String
+  additionalDetails     Json?
+  
+  // Admin processing
+  processedBy       String?          // Admin user ID
+  processedAt       DateTime?
+  adminNotes        String?
+  receiptUrl        String?          // Receipt sent to user
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title     String
+  message   String
+  type      String   // 'deposit', 'withdrawal', 'investment', 'system'
+  read      Boolean  @default(false)
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([read])
+}
+
+model SystemSettings {
+  id                  String   @id @default(cuid())
+  key                 String   @unique
+  value               Json
+  description         String?
+  
+  // Settings like:
+  // - depositAccountDetails (USDT, Bank accounts)
+  // - whatsappNumbers (for admin notifications)
+  // - emailSettings
+  // - defaultAssetPrices
+  
+  updatedAt           DateTime @updatedAt
+  
+  @@index([key])
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  name            String
+  email           String
+  phone           String
+  preferredDate   DateTime
+  preferredTime   String
+  message         String?
+  status          AppointmentStatus @default(PENDING)
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  @@index([email])
+  @@index([status])
+  @@index([preferredDate])
+}
