@@ -7,19 +7,30 @@ export async function GET() {
       totalUsers,
       totalInvestments,
       pendingWithdrawals,
-      pendingDeposits,
+      pendingInvestments,
       totalTransactionVolume,
       activeInvestments,
     ] = await Promise.all([
       prisma.user.count({ where: { role: 'USER' } }),
-      prisma.investment.count(),
+      prisma.investment.count({ where: { closedAt: null } }), // Only count non-closed investments
       prisma.withdrawal.count({ where: { status: 'PENDING' } }),
-      prisma.transaction.count({ where: { type: 'DEPOSIT', status: 'PENDING' } }),
+      prisma.investment.count({ 
+        where: { 
+          closureRequested: true,
+          closedAt: null, // Not yet closed
+          closureRejectedAt: null // Not rejected
+        } 
+      }),
       prisma.transaction.aggregate({
         _sum: { amount: true },
         where: { status: 'COMPLETED' },
       }),
-      prisma.investment.count({ where: { isActive: true } }),
+      prisma.investment.count({ 
+        where: { 
+          isActive: true,
+          closedAt: null // Only count investments that are not closed
+        } 
+      }),
     ]);
 
     const recentTransactions = await prisma.transaction.findMany({
@@ -66,11 +77,11 @@ export async function GET() {
         totalUsers,
         totalInvestments,
         pendingWithdrawals,
-        pendingDeposits,
-        totalTransactionVolume: totalTransactionVolume._sum.amount || 0,
+        pendingInvestments,
+        totalVolume: totalTransactionVolume._sum.amount || 0,
         activeInvestments,
       },
-      recentTransactions,
+      recentActivity: recentTransactions,
       assetDistribution: assetStats,
     });
   } catch (error) {
