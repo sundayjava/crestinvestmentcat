@@ -22,11 +22,11 @@ export async function GET(request: Request) {
         name: true,
         role: true,
         balance: true,
-        verified: true,
+        emailVerified: true,
         hasDimeAccount: true,
         dimeBankAccountNumber: true,
         dimeBankAccountName: true,
-        dimeBankAccount: true,
+        dimeBankDetails: true,
       },
     });
 

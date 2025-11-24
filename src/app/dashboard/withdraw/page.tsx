@@ -58,20 +58,13 @@ export default function WithdrawPage() {
     }
 
     // Pre-fill Dime Bank account if user has one
-    if (user.dimeBankAccount) {
-      try {
-        const dimeBankData = JSON.parse(user.dimeBankAccount);
-        if (dimeBankData.accountNumber) {
-          setValue('dimeAccountNumber', dimeBankData.accountNumber);
-        }
-        if (dimeBankData.accountName) {
-          setValue('dimeAccountName', dimeBankData.accountName);
-        }
-      } catch (error) {
-        console.error('Error parsing Dime Bank account:', error);
-      }
+    if (user.dimeBankAccountNumber) {
+      setValue('dimeAccountNumber', user.dimeBankAccountNumber);
     }
-  }, [user, setValue]);
+    if (user.dimeBankAccountName) {
+      setValue('dimeAccountName', user.dimeBankAccountName);
+    }
+  }, [user, setValue, isHydrated, router]);
 
   const onSubmit = async (data: FormData) => {
     if (!user) return;
@@ -91,10 +84,8 @@ export default function WithdrawPage() {
         body: JSON.stringify({
           userId: user.id,
           amount: data.amount,
-          dimeBankDetails: {
-            accountNumber: data.dimeAccountNumber,
-            accountName: data.dimeAccountName,
-          },
+          dimeBankAccountNumber: data.dimeAccountNumber,
+          dimeBankAccountName: data.dimeAccountName,
         }),
       });
 
@@ -204,7 +195,7 @@ export default function WithdrawPage() {
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Dime Bank Account Details</h3>
                 
-                {user?.dimeBankAccount && (
+                {user?.dimeBankAccountNumber && (
                   <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-800">
                     ✓ Using your registered Dime Bank account
                   </div>

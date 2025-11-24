@@ -3,14 +3,30 @@ import { prisma } from '@/lib/prisma';
 import { generateReceiptId, formatDateTime } from '@/lib/utils';
 import { sendWithdrawalReceipt } from '@/lib/email';
 
-export async function PATCH(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const { status, adminId, adminNotes } = body; // status: 'COMPLETED' or 'REJECTED'
+    const { action, adminId, adminNotes } = body; // action: 'approve' or 'reject'
+
+    if (!action || !adminId) {
+      return NextResponse.json(
+        { error: 'Action and admin ID are required' },
+        { status: 400 }
+      );
+    }
+
+    if (action !== 'approve' && action !== 'reject') {
+      return NextResponse.json(
+        { error: 'Invalid action' },
+        { status: 400 }
+      );
+    }
+
+    const status = action === 'approve' ? 'COMPLETED' : 'REJECTED';
 
     const withdrawal = await prisma.withdrawal.findUnique({
       where: { id },
@@ -27,6 +43,14 @@ export async function PATCH(
     }
 
     if (status === 'COMPLETED') {
+      // Check if user has sufficient balance
+      if (withdrawal.user.balance < withdrawal.amount) {
+        return NextResponse.json(
+          { error: 'User has insufficient balance' },
+          { status: 400 }
+        );
+      }
+
       // Deduct amount from user balance
       await prisma.user.update({
         where: { id: withdrawal.userId },

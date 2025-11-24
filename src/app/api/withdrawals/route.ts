@@ -96,15 +96,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
+    // If userId is provided, fetch for specific user, otherwise fetch all (for admin)
     const withdrawals = await prisma.withdrawal.findMany({
-      where: { userId },
+      where: userId ? { userId } : {},
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 

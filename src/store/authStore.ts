@@ -7,11 +7,11 @@ interface User {
   name?: string;
   role: 'USER' | 'ADMIN';
   balance: number;
-  verified: boolean;
+  emailVerified: boolean;
   hasDimeAccount: boolean;
   dimeBankAccountNumber?: string;
   dimeBankAccountName?: string;
-  dimeBankAccount?: string;
+  dimeBankDetails?: any;
 }
 
 interface AuthState {

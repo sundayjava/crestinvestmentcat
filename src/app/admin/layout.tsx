@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   CreditCard,
-  PieChart
+  PieChart,
+  Wallet
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Investments', href: '/admin/investments', icon: PieChart },
+  { name: 'Withdrawals', href: '/admin/withdrawals', icon: Wallet },
   { name: 'Transactions', href: '/admin/transactions', icon: TrendingUp },
   { name: 'Assets', href: '/admin/assets', icon: DollarSign },
   { name: 'Deposit Methods', href: '/admin/deposit-methods', icon: CreditCard },
