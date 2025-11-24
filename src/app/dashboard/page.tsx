@@ -28,7 +28,7 @@ import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, logout, isHydrated } = useAuthStore();
+  const { user, logout, isHydrated, updateBalance } = useAuthStore();
   const { assets, setAssets } = useAssetsStore();
   const { investments, setInvestments } = useInvestmentsStore();
   const [isLoading, setIsLoading] = useState(true);
@@ -99,16 +99,23 @@ export default function DashboardPage() {
     if (!user) return;
 
     try {
-      const [assetsRes, investmentsRes] = await Promise.all([
+      const [assetsRes, investmentsRes, userProfileRes] = await Promise.all([
         fetch('/api/assets'),
         fetch(`/api/investments?userId=${user.id}`),
+        fetch(`/api/user/profile?userId=${user.id}`),
       ]);
 
       const assetsData = await assetsRes.json();
       const investmentsData = await investmentsRes.json();
+      const userProfileData = await userProfileRes.json();
 
       setAssets(assetsData.assets);
       setInvestments(investmentsData.investments);
+      
+      // Update user balance in store if it changed
+      if (userProfileData.user && userProfileData.user.balance !== user.balance) {
+        updateBalance(userProfileData.user.balance);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

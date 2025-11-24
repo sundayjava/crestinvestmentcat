@@ -50,7 +50,7 @@ export default function AdminInvestmentsPage() {
   const [filteredInvestments, setFilteredInvestments] = useState<Investment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'closure-requested' | 'history'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'closure-requested'>('all');
   const [transactions, setTransactions] = useState<any[]>([]);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -94,18 +94,21 @@ export default function AdminInvestmentsPage() {
   };
 
   useEffect(() => {
-    let filtered = investments;
+    // EXCLUDE all closed investments from ALL views
+    let filtered = investments.filter(inv => !inv.closedAt);
 
-    // Filter by status
+    // Filter by status (only non-closed investments)
     if (filterStatus === 'pending') {
+      // Pending: Not active, not closure requested
       filtered = filtered.filter(inv => !inv.isActive && !inv.closureRequested);
     } else if (filterStatus === 'approved') {
+      // Approved: Active investments only (not closure requested)
       filtered = filtered.filter(inv => inv.isActive && !inv.closureRequested);
     } else if (filterStatus === 'closure-requested') {
+      // Closure requested: Active but user wants to close
       filtered = filtered.filter(inv => inv.closureRequested && inv.isActive);
-    } else if (filterStatus === 'history') {
-      filtered = filtered.filter(inv => !inv.isActive && inv.closedAt);
     }
+    // Removed 'history' filter - closed investments are completely hidden
 
     // Filter by search term
     if (searchTerm) {
@@ -480,7 +483,6 @@ export default function AdminInvestmentsPage() {
                   <option value="pending">Pending Approval</option>
                   <option value="approved">Approved & Active</option>
                   <option value="closure-requested">Closure Requested</option>
-                  <option value="history">History (Closed)</option>
                 </select>
               </div>
 
