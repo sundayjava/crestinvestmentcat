@@ -14,7 +14,7 @@ CREATE TYPE "AssetType" AS ENUM ('GOLD', 'SILVER', 'CRYPTO', 'STOCKS', 'REAL_EST
 CREATE TYPE "WithdrawalStatus" AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "AppointmentStatus" AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED');
+CREATE TYPE "AppointmentStatus" AS ENUM ('PENDING', 'RESPONDED', 'CONFIRMED', 'CANCELLED', 'COMPLETED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -32,7 +32,7 @@ CREATE TABLE "User" (
     "province" TEXT,
     "city" TEXT,
     "postalCode" TEXT,
-    "country" TEXT DEFAULT 'South Africa',
+    "country" TEXT DEFAULT 'USA',
     "investorType" TEXT,
     "investableAssets" TEXT,
     "referralSource" TEXT,
@@ -168,6 +168,7 @@ CREATE TABLE "SystemSettings" (
 -- CreateTable
 CREATE TABLE "Appointment" (
     "id" TEXT NOT NULL,
+    "userId" TEXT,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
@@ -175,6 +176,9 @@ CREATE TABLE "Appointment" (
     "preferredTime" TEXT NOT NULL,
     "message" TEXT,
     "status" "AppointmentStatus" NOT NULL DEFAULT 'PENDING',
+    "adminResponse" TEXT,
+    "respondedBy" TEXT,
+    "respondedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -242,6 +246,9 @@ CREATE UNIQUE INDEX "SystemSettings_key_key" ON "SystemSettings"("key");
 CREATE INDEX "SystemSettings_key_idx" ON "SystemSettings"("key");
 
 -- CreateIndex
+CREATE INDEX "Appointment_userId_idx" ON "Appointment"("userId");
+
+-- CreateIndex
 CREATE INDEX "Appointment_email_idx" ON "Appointment"("email");
 
 -- CreateIndex
@@ -267,3 +274,7 @@ ALTER TABLE "Withdrawal" ADD CONSTRAINT "Withdrawal_userId_fkey" FOREIGN KEY ("u
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Appointment" ADD CONSTRAINT "Appointment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

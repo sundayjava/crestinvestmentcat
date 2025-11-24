@@ -27,7 +27,7 @@ const schema = yup.object({
   city: yup.string().required('City is required'),
   province: yup.string().required('Province is required'),
   postalCode: yup.string().required('Postal code is required'),
-  country: yup.string().nullable().default('South Africa'),
+  country: yup.string().nullable().default('USA'),
   
   // Investment Profile
   investorType: yup.string().required('Please select investor type'),
@@ -60,7 +60,7 @@ export default function RegisterPage() {
     resolver: yupResolver(schema),
     defaultValues: {
       hasDimeAccount: true,
-      country: 'South Africa',
+      country: 'USA',
     },
   });
 
@@ -257,7 +257,7 @@ export default function RegisterPage() {
                       <Label htmlFor="country">Country</Label>
                       <Input
                         id="country"
-                        defaultValue="South Africa"
+                        defaultValue="USA"
                         {...register('country')}
                         disabled={isLoading}
                       />
@@ -279,6 +279,7 @@ export default function RegisterPage() {
                     >
                       <option value="">Select investor type</option>
                       <option value="Individual">Individual Investor</option>
+                      <option value="Corporate">Domestic Partnership</option>
                       <option value="Corporate">Corporate Investor</option>
                       <option value="Institutional">Institutional Investor</option>
                       <option value="High Net Worth">High Net Worth Individual</option>
@@ -298,11 +299,11 @@ export default function RegisterPage() {
                       className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#bea425] focus:ring-[#bea425] focus:outline-none"
                     >
                       <option value="">Select range</option>
-                      <option value="Under R50,000">Under R50,000</option>
-                      <option value="R50,000 - R100,000">R50,000 - R100,000</option>
-                      <option value="R100,000 - R500,000">R100,000 - R500,000</option>
-                      <option value="R500,000 - R1,000,000">R500,000 - R1,000,000</option>
-                      <option value="Over R1,000,000">Over R1,000,000</option>
+                      <option value="Under $50,000">Under $50,000</option>
+                      <option value="$50,000 - $100,000">$50,000 - $100,000</option>
+                      <option value="$100,000 - $500,000">$100,000 - $500,000</option>
+                      <option value="$500,000 - $1,000,000">$500,000 - $1,000,000</option>
+                      <option value="Over $1,000,000">Over $1,000,000</option>
                     </select>
                     {errors.investableAssets && (
                       <p className="text-xs text-red-600">{errors.investableAssets.message}</p>

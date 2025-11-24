@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         city: city || null,
         province: province || null,
         postalCode: postalCode || null,
-        country: country || 'South Africa',
+        country: country || 'u',
         investorType: investorType || null,
         investableAssets: investableAssets || null,
         referralSource: referralSource || null,

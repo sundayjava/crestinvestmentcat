@@ -77,7 +77,7 @@ model User {
   province      String?
   city          String?
   postalCode    String?
-  country       String?   @default("South Africa")
+  country       String?   @default("USA")
   
   // Investment Profile
   investorType  String?   // e.g., "Individual", "Corporate", "Institutional"

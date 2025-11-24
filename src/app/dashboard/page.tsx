@@ -532,15 +532,15 @@ export default function DashboardPage() {
                 {activeInvestments.map((investment) => {
                   const profitLossPercent = investment.amount > 0 ? ((investment.profitLoss / investment.amount) * 100) : 0;
                   return (
-                    <div key={investment.id} className="flex items-center justify-between p-4 border-2 rounded-xl hover:shadow-md transition-shadow bg-linear-to-r from-white to-gray-50">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className={`h-12 w-12 rounded-full ${investment.profitLoss >= 0 ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
+                    <div key={investment.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 border-2 rounded-xl hover:shadow-md transition-shadow bg-linear-to-r from-white to-gray-50">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className={`h-12 w-12 shrink-0 rounded-full ${investment.profitLoss >= 0 ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
                           <span className={`text-2xl font-bold ${investment.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {investment.asset.symbol.charAt(0)}
                           </span>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-lg text-gray-900">{investment.asset.name}</h4>
                             {investment.closureRequested && (
                               <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-700">
@@ -567,8 +567,8 @@ export default function DashboardPage() {
                           )} */}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
+                      <div className="flex items-center gap-3 sm:gap-4 justify-between sm:justify-end">
+                        <div className="text-left sm:text-right">
                           <p className="font-bold text-xl text-gray-900">{formatCurrency(investment.currentValue)}</p>
                           <p className={`text-sm font-semibold ${investment.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {investment.profitLoss >= 0 ? '+' : ''}{formatCurrency(investment.profitLoss)}
@@ -582,7 +582,7 @@ export default function DashboardPage() {
                             onClick={() => handleRequestClose(investment)}
                             variant="outline"
                             size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 shrink-0"
                           >
                             <XCircle className="h-4 w-4 mr-1" />
                             Close
