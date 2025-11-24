@@ -16,22 +16,31 @@ import {
   X,
   CreditCard,
   PieChart,
-  Wallet
+  Wallet,
+  CalendarClock
 } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+interface BadgeCounts {
+  newUsers: number;
+  pendingInvestments: number;
+  pendingWithdrawals: number;
+  pendingAppointments: number;
+}
+
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Investments', href: '/admin/investments', icon: PieChart },
-  { name: 'Withdrawals', href: '/admin/withdrawals', icon: Wallet },
-  { name: 'Transactions', href: '/admin/transactions', icon: TrendingUp },
-  { name: 'Assets', href: '/admin/assets', icon: DollarSign },
-  { name: 'Deposit Methods', href: '/admin/deposit-methods', icon: CreditCard },
-  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, badge: null },
+  { name: 'Users', href: '/admin/users', icon: Users, badge: null },
+  { name: 'Investments', href: '/admin/investments', icon: PieChart, badge: 'pendingInvestments' },
+  { name: 'Withdrawals', href: '/admin/withdrawals', icon: Wallet, badge: 'pendingWithdrawals' },
+  { name: 'Transactions', href: '/admin/transactions', icon: TrendingUp, badge: null },
+  { name: 'Appointments', href: '/admin/appointments', icon: CalendarClock, badge: 'pendingAppointments' },
+  { name: 'Assets', href: '/admin/assets', icon: DollarSign, badge: null },
+  { name: 'Deposit Methods', href: '/admin/deposit-methods', icon: CreditCard, badge: null },
+  { name: 'Notifications', href: '/admin/notifications', icon: Bell, badge: null },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -39,6 +48,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const { user, logout, isHydrated } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [badgeCounts, setBadgeCounts] = useState<BadgeCounts>({
+    newUsers: 0,
+    pendingInvestments: 0,
+    pendingWithdrawals: 0,
+    pendingAppointments: 0,
+  });
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -51,7 +66,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       router.push('/dashboard');
       return;
     }
+
+    fetchBadgeCounts();
+    const interval = setInterval(fetchBadgeCounts, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
   }, [user, isHydrated]);
+
+  const fetchBadgeCounts = async () => {
+    try {
+      const response = await fetch('/api/admin/badge-counts');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Badge counts received:', data);
+        setBadgeCounts(data);
+      }
+    } catch (error) {
+      console.error('Error fetching badge counts:', error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -107,19 +139,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
+              const badgeCount = item.badge ? badgeCounts[item.badge as keyof BadgeCounts] : 0;
+              
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  className={`flex items-center justify-between space-x-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive
                       ? 'bg-[#bea425] text-white'
                       : 'text-gray-400 hover:bg-gray-900 hover:text-white'
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.name}</span>
+                  <div className="flex items-center space-x-3">
+                    <Icon className="h-5 w-5" />
+                    <span className="font-medium">{item.name}</span>
+                  </div>
+                  {badgeCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
+                      {badgeCount > 99 ? '99+' : badgeCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}

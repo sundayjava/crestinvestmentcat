@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
@@ -12,11 +13,15 @@ export default function Navbar() {
           <div className="flex items-center space-x-8">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="h-9 w-9 bg-[#bea425] rounded-lg flex items-center justify-center group-hover:bg-[#a08d1f] transition-colors">
-                <span className="text-white font-bold text-lg">I</span>
-              </div>
+              <Image 
+                src="/logo.png" 
+                alt="CrestCat Logo" 
+                width={70} 
+                height={400}
+                className="transition-opacity group-hover:opacity-80"
+              />
               <span className="text-xl font-bold text-white">
-                crestcat
+                CrestCat
               </span>
             </Link>
 

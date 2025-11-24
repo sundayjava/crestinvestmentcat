@@ -10,7 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Edit, Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Edit, Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -36,6 +38,21 @@ export default function AdminAssetsPage() {
   const [newPrice, setNewPrice] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [priceHistory, setPriceHistory] = useState<any[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newAsset, setNewAsset] = useState({
+    name: '',
+    symbol: '',
+    type: 'GOLD',
+    description: '',
+    currentPrice: '',
+    minInvestment: '',
+    imageUrl: '',
+  });
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -87,6 +104,108 @@ export default function AdminAssetsPage() {
     }
   };
 
+  const handleCreateAsset = async () => {
+    if (!newAsset.name || !newAsset.symbol || !newAsset.currentPrice) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await fetch('/api/assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newAsset,
+          currentPrice: parseFloat(newAsset.currentPrice),
+          minInvestment: newAsset.minInvestment ? parseFloat(newAsset.minInvestment) : 10,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchAssets();
+        setIsAddDialogOpen(false);
+        setNewAsset({
+          name: '',
+          symbol: '',
+          type: 'GOLD',
+          description: '',
+          currentPrice: '',
+          minInvestment: '',
+          imageUrl: '',
+        });
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to create asset');
+      }
+    } catch (error) {
+      console.error('Error creating asset:', error);
+      alert('Failed to create asset');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleDeleteAsset = async (assetId: string, assetName: string) => {
+    if (!confirm(`Are you sure you want to delete "${assetName}"? This cannot be undone.`)) {
+      return;
+    }
+
+    setIsDeleting(assetId);
+    try {
+      const response = await fetch(`/api/assets/${assetId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchAssets();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete asset');
+      }
+    } catch (error) {
+      console.error('Error deleting asset:', error);
+      alert('Failed to delete asset');
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleEditAsset = async () => {
+    if (!editingAsset) return;
+
+    setIsEditing(true);
+    try {
+      const response = await fetch(`/api/assets/${editingAsset.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingAsset.name,
+          symbol: editingAsset.symbol,
+          type: editingAsset.type,
+          description: editingAsset.description,
+          currentPrice: parseFloat(editingAsset.currentPrice),
+          minInvestment: editingAsset.minInvestment ? parseFloat(editingAsset.minInvestment) : 10,
+          imageUrl: editingAsset.imageUrl,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchAssets();
+        setIsEditDialogOpen(false);
+        setEditingAsset(null);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to update asset');
+      }
+    } catch (error) {
+      console.error('Error updating asset:', error);
+      alert('Failed to update asset');
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
   const generatePriceHistory = () => {
     // Generate sample price history for demonstration
     const history = Array.from({ length: 30 }, (_, i) => {
@@ -131,8 +250,128 @@ export default function AdminAssetsPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Admin Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Asset Management</h1>
-          <p className="text-sm text-gray-600">Manage asset prices and monitor market performance</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Asset Management</h1>
+              <p className="text-sm text-gray-600">Manage asset prices and monitor market performance</p>
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#bea425] hover:bg-[#d4b942] text-black">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Asset
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Asset</DialogTitle>
+                  <DialogDescription>
+                    Create a new investment asset for users to invest in
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Asset Name *</Label>
+                      <Input
+                        id="name"
+                        placeholder="e.g., Gold"
+                        value={newAsset.name}
+                        onChange={(e) => setNewAsset({ ...newAsset, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="symbol">Symbol *</Label>
+                      <Input
+                        id="symbol"
+                        placeholder="e.g., AU"
+                        value={newAsset.symbol}
+                        onChange={(e) => setNewAsset({ ...newAsset, symbol: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Asset Type *</Label>
+                    <Select value={newAsset.type} onValueChange={(value) => setNewAsset({ ...newAsset, type: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select asset type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GOLD">Gold</SelectItem>
+                        <SelectItem value="SILVER">Silver</SelectItem>
+                        <SelectItem value="CRYPTO">Cryptocurrency</SelectItem>
+                        <SelectItem value="STOCKS">Stocks</SelectItem>
+                        <SelectItem value="REAL_ESTATE">Real Estate</SelectItem>
+                        <SelectItem value="BONDS">Bonds</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPrice">Current Price (USD) *</Label>
+                      <Input
+                        id="currentPrice"
+                        type="number"
+                        step="0.01"
+                        placeholder="e.g., 1850.50"
+                        value={newAsset.currentPrice}
+                        onChange={(e) => setNewAsset({ ...newAsset, currentPrice: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="minInvestment">Min Investment (USD)</Label>
+                      <Input
+                        id="minInvestment"
+                        type="number"
+                        step="0.01"
+                        placeholder="e.g., 100 (default: 10)"
+                        value={newAsset.minInvestment}
+                        onChange={(e) => setNewAsset({ ...newAsset, minInvestment: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="imageUrl">Image URL</Label>
+                    <Input
+                      id="imageUrl"
+                      placeholder="https://example.com/image.jpg"
+                      value={newAsset.imageUrl}
+                      onChange={(e) => setNewAsset({ ...newAsset, imageUrl: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Enter asset description..."
+                      value={newAsset.description}
+                      onChange={(e) => setNewAsset({ ...newAsset, description: e.target.value })}
+                      rows={4}
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleCreateAsset} 
+                    disabled={isCreating || !newAsset.name || !newAsset.symbol || !newAsset.currentPrice} 
+                    className="w-full bg-[#bea425] hover:bg-[#d4b942] text-black"
+                  >
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Asset'
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
@@ -151,13 +390,29 @@ export default function AdminAssetsPage() {
                       <CardTitle>{asset.name}</CardTitle>
                       <CardDescription>{asset.symbol}</CardDescription>
                     </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" onClick={() => setSelectedAsset({ ...asset, _count: { investments: 0 } })}>
-                          <Edit className="h-4 w-4 mr-1" />
-                          Update Price
-                        </Button>
-                      </DialogTrigger>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => {
+                          setEditingAsset({
+                            ...asset,
+                            currentPrice: asset.currentPrice.toString(),
+                            minInvestment: asset.minInvestment.toString(),
+                          });
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" onClick={() => setSelectedAsset({ ...asset, _count: { investments: 0 } })}>
+                            <TrendingUp className="h-4 w-4 mr-1" />
+                            Price
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Update Price - {asset.name}</DialogTitle>
@@ -186,6 +441,19 @@ export default function AdminAssetsPage() {
                         </div>
                       </DialogContent>
                     </Dialog>
+                    <Button 
+                      size="sm" 
+                      variant="destructive" 
+                      onClick={() => handleDeleteAsset(asset.id, asset.name)}
+                      disabled={isDeleting === asset.id}
+                    >
+                      {isDeleting === asset.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -266,6 +534,120 @@ export default function AdminAssetsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Asset Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Asset</DialogTitle>
+            <DialogDescription>
+              Update asset information and settings
+            </DialogDescription>
+          </DialogHeader>
+          {editingAsset && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Asset Name *</Label>
+                  <Input
+                    id="edit-name"
+                    placeholder="e.g., Gold"
+                    value={editingAsset.name}
+                    onChange={(e) => setEditingAsset({ ...editingAsset, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-symbol">Symbol *</Label>
+                  <Input
+                    id="edit-symbol"
+                    placeholder="e.g., AU"
+                    value={editingAsset.symbol}
+                    onChange={(e) => setEditingAsset({ ...editingAsset, symbol: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-type">Asset Type *</Label>
+                <Select value={editingAsset.type} onValueChange={(value) => setEditingAsset({ ...editingAsset, type: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select asset type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GOLD">Gold</SelectItem>
+                    <SelectItem value="SILVER">Silver</SelectItem>
+                    <SelectItem value="CRYPTO">Cryptocurrency</SelectItem>
+                    <SelectItem value="STOCKS">Stocks</SelectItem>
+                    <SelectItem value="REAL_ESTATE">Real Estate</SelectItem>
+                    <SelectItem value="BONDS">Bonds</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-currentPrice">Current Price (USD) *</Label>
+                  <Input
+                    id="edit-currentPrice"
+                    type="number"
+                    step="0.01"
+                    placeholder="e.g., 1850.50"
+                    value={editingAsset.currentPrice}
+                    onChange={(e) => setEditingAsset({ ...editingAsset, currentPrice: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-minInvestment">Min Investment (USD)</Label>
+                  <Input
+                    id="edit-minInvestment"
+                    type="number"
+                    step="0.01"
+                    placeholder="e.g., 100"
+                    value={editingAsset.minInvestment}
+                    onChange={(e) => setEditingAsset({ ...editingAsset, minInvestment: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-imageUrl">Image URL</Label>
+                <Input
+                  id="edit-imageUrl"
+                  placeholder="https://example.com/image.jpg"
+                  value={editingAsset.imageUrl || ''}
+                  onChange={(e) => setEditingAsset({ ...editingAsset, imageUrl: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  placeholder="Enter asset description..."
+                  value={editingAsset.description || ''}
+                  onChange={(e) => setEditingAsset({ ...editingAsset, description: e.target.value })}
+                  rows={4}
+                />
+              </div>
+
+              <Button 
+                onClick={handleEditAsset} 
+                disabled={isEditing || !editingAsset.name || !editingAsset.symbol || !editingAsset.currentPrice} 
+                className="w-full bg-[#bea425] hover:bg-[#d4b942] text-black"
+              >
+                {isEditing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Updating...
+                  </>
+                ) : (
+                  'Update Asset'
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

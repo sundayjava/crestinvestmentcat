@@ -22,9 +22,11 @@ import {
   DollarSign,
   Target,
   XCircle,
-  Receipt
+  Receipt,
+  Bell
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
+import Image from 'next/image';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function DashboardPage() {
@@ -40,6 +42,9 @@ export default function DashboardPage() {
   const [isClosing, setIsClosing] = useState(false);
   const [closeMessage, setCloseMessage] = useState('');
   const [closeError, setCloseError] = useState('');
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     // Wait for hydration before checking auth
@@ -100,18 +105,22 @@ export default function DashboardPage() {
     if (!user) return;
 
     try {
-      const [assetsRes, investmentsRes, userProfileRes] = await Promise.all([
+      const [assetsRes, investmentsRes, userProfileRes, notificationsRes] = await Promise.all([
         fetch('/api/assets'),
         fetch(`/api/investments?userId=${user.id}`),
         fetch(`/api/user/profile?userId=${user.id}`),
+        fetch(`/api/user/notifications?userId=${user.id}`),
       ]);
 
       const assetsData = await assetsRes.json();
       const investmentsData = await investmentsRes.json();
       const userProfileData = await userProfileRes.json();
+      const notificationsData = await notificationsRes.json();
 
       setAssets(assetsData.assets);
       setInvestments(investmentsData.investments);
+      setNotifications(notificationsData);
+      setUnreadCount(notificationsData.filter((n: any) => !n.read).length);
       
       // Update user balance in store if it changed
       if (userProfileData.user && userProfileData.user.balance !== user.balance) {
@@ -221,18 +230,35 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 bg-gradient-to-br from-[#bea425] to-[#d4b942] rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-black font-bold text-2xl">I</span>
-              </div>
+              <Image 
+                              src="/logo.png" 
+                              alt="CrestCat Logo" 
+                              width={70} 
+                              height={400}
+                              className="transition-opacity group-hover:opacity-80"
+                            />
               <div>
                 <h1 className="text-2xl font-bold text-white">CrestCat</h1>
                 <p className="text-sm text-gray-400">Welcome back, <span className="text-[#bea425]">{user?.name}</span></p>
               </div>
             </div>
-            <Button variant="ghost" onClick={handleLogout} size="sm" className="text-white hover:text-[#bea425] hover:bg-gray-800">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative text-white hover:text-[#bea425] p-2 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              <Button variant="ghost" onClick={handleLogout} size="sm" className="text-white hover:text-[#bea425] hover:bg-gray-800">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -681,6 +707,98 @@ export default function DashboardPage() {
                   Cancel
                 </Button>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Notifications</DialogTitle>
+            <DialogDescription>
+              All your messages, appointment responses, and system notifications
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-4 rounded-lg border ${
+                    notification.read ? 'bg-white' : 'bg-blue-50 border-blue-200'
+                  }`}
+                  onClick={async () => {
+                    if (!notification.read) {
+                      await fetch('/api/user/notifications', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ notificationId: notification.id }),
+                      });
+                      setNotifications(notifications.map(n =>
+                        n.id === notification.id ? { ...n, read: true } : n
+                      ));
+                      setUnreadCount(prev => Math.max(0, prev - 1));
+                    }
+                  }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-gray-900">{notification.title}</h4>
+                        {!notification.read && (
+                          <span className="h-2 w-2 bg-blue-500 rounded-full"></span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">{notification.message}</p>
+                      {notification.metadata && notification.metadata.response && (
+                        <div className="mt-2 p-3 bg-green-50 rounded border border-green-200">
+                          <p className="text-sm font-medium text-green-900 mb-1">Admin Response:</p>
+                          <p className="text-sm text-gray-800">{notification.metadata.response}</p>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500 mt-2">
+                        {formatDateTime(notification.createdAt)}
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        notification.type === 'appointment' ? 'bg-purple-100 text-purple-800' :
+                        notification.type === 'investment' ? 'bg-blue-100 text-blue-800' :
+                        notification.type === 'withdrawal' ? 'bg-orange-100 text-orange-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {notification.type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <Bell className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600">No notifications yet</p>
+              </div>
+            )}
+          </div>
+          {unreadCount > 0 && (
+            <div className="flex justify-end pt-4 border-t">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await fetch('/api/user/notifications', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user?.id }),
+                  });
+                  setNotifications(notifications.map(n => ({ ...n, read: true })));
+                  setUnreadCount(0);
+                }}
+              >
+                Mark all as read
+              </Button>
             </div>
           )}
         </DialogContent>

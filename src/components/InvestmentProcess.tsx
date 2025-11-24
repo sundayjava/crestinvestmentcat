@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 
 export default function InvestmentProcess() {
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-20 bg-linear-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            crestcat INVESTMENT PROCESS
+            CRESTCAT INVESTMENT PROCESS
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Our strategic approach combines cutting-edge technology with proven investment methodologies

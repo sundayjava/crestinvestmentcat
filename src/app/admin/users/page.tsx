@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Search, Loader2, Plus, Minus, DollarSign, User, CheckCircle, Ban, Check, Eye } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Search, Loader2, Plus, Minus, DollarSign, User, CheckCircle, Ban, Check, Eye, Edit } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 
 interface UserData {
@@ -54,6 +55,9 @@ export default function AdminUsersPage() {
   const [dimeAccountData, setDimeAccountData] = useState({ accountNumber: '', accountName: '' });
   const [isCreatingDime, setIsCreatingDime] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [isEditingUser, setIsEditingUser] = useState(false);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -162,6 +166,43 @@ export default function AdminUsersPage() {
       console.error('Error creating Dime account:', error);
     } finally {
       setIsCreatingDime(false);
+    }
+  };
+
+  const handleEditUser = async () => {
+    if (!editingUser) return;
+
+    setIsEditingUser(true);
+    try {
+      const response = await fetch(`/api/admin/users/${editingUser.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingUser.name,
+          email: editingUser.email,
+          phone: editingUser.phone,
+          company: editingUser.company,
+          address: editingUser.address,
+          city: editingUser.city,
+          province: editingUser.province,
+          postalCode: editingUser.postalCode,
+          country: editingUser.country,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchUsers();
+        setIsEditDialogOpen(false);
+        setEditingUser(null);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to update user');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Failed to update user');
+    } finally {
+      setIsEditingUser(false);
     }
   };
 
@@ -322,6 +363,19 @@ export default function AdminUsersPage() {
                     </div>
 
                     <div className="flex flex-col gap-2 ml-4">
+                      {/* Edit User */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingUser({ ...userData });
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+
                       {/* Toggle Active Status */}
                       <Button
                         size="sm"
@@ -554,6 +608,130 @@ export default function AdminUsersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit User Information</DialogTitle>
+            <DialogDescription>
+              Update user profile details
+            </DialogDescription>
+          </DialogHeader>
+          {editingUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Full Name</Label>
+                  <Input
+                    id="edit-name"
+                    placeholder="Enter full name"
+                    value={editingUser.name || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    placeholder="Enter email"
+                    value={editingUser.email || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Input
+                    id="edit-phone"
+                    placeholder="Enter phone number"
+                    value={editingUser.phone || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-company">Company</Label>
+                  <Input
+                    id="edit-company"
+                    placeholder="Enter company name"
+                    value={editingUser.company || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, company: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-address">Address</Label>
+                <Textarea
+                  id="edit-address"
+                  placeholder="Enter street address"
+                  value={editingUser.address || ''}
+                  onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
+                  rows={2}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-city">City</Label>
+                  <Input
+                    id="edit-city"
+                    placeholder="Enter city"
+                    value={editingUser.city || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, city: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-province">Province</Label>
+                  <Input
+                    id="edit-province"
+                    placeholder="Enter province"
+                    value={editingUser.province || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, province: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-postalCode">Postal Code</Label>
+                  <Input
+                    id="edit-postalCode"
+                    placeholder="Enter postal code"
+                    value={editingUser.postalCode || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, postalCode: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-country">Country</Label>
+                <Input
+                  id="edit-country"
+                  placeholder="Enter country"
+                  value={editingUser.country || ''}
+                  onChange={(e) => setEditingUser({ ...editingUser, country: e.target.value })}
+                />
+              </div>
+
+              <Button 
+                onClick={handleEditUser} 
+                disabled={isEditingUser || !editingUser.name || !editingUser.email} 
+                className="w-full bg-[#bea425] hover:bg-[#d4b942] text-black"
+              >
+                {isEditingUser ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Updating...
+                  </>
+                ) : (
+                  'Update User'
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
