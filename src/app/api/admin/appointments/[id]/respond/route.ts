@@ -3,10 +3,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { adminResponse, adminId } = await request.json();
+    const { id } = await params;
 
     if (!adminResponse || !adminId) {
       return NextResponse.json(
@@ -16,7 +17,7 @@ export async function POST(
     }
 
     const appointment = await prisma.appointment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         adminResponse,
         respondedBy: adminId,
