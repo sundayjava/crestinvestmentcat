@@ -88,14 +88,21 @@ export async function POST(
 
       // Generate and send receipt
       const receiptId = generateReceiptId();
-      await sendWithdrawalReceipt(withdrawal.user.email, {
-        name: withdrawal.user.name || withdrawal.user.email,
-        receiptId,
-        amount: withdrawal.amount,
-        bankAccount: withdrawal.dimeBankAccountNumber,
-        date: formatDateTime(new Date()),
-        status: 'Completed',
-      });
+      
+      try {
+        await sendWithdrawalReceipt(withdrawal.user.email, {
+          name: withdrawal.user.name || withdrawal.user.email,
+          receiptId,
+          amount: withdrawal.amount,
+          bankAccount: withdrawal.dimeBankAccountNumber,
+          date: formatDateTime(new Date()),
+          status: 'Completed',
+        });
+        console.log(`Withdrawal receipt sent to ${withdrawal.user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send withdrawal receipt email:', emailError);
+        // Continue processing even if email fails
+      }
 
       // Create notification for user
       await prisma.notification.create({

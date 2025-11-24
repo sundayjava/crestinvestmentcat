@@ -21,7 +21,8 @@ import {
   Activity,
   DollarSign,
   Target,
-  XCircle
+  XCircle,
+  Receipt
 } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -431,7 +432,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link href="/dashboard/invest">
             <Card className="hover:shadow-2xl transition-all cursor-pointer border-2 border-transparent hover:border-[#bea425] bg-gradient-to-br from-[#bea425] to-[#d4b942] text-black h-full">
               <CardContent className="pt-6">
@@ -458,6 +459,22 @@ export default function DashboardPage() {
                   </div>
                   <div className="h-16 w-16 rounded-full bg-white/10 flex items-center justify-center">
                     <ArrowDownRight className="h-8 w-8 text-[#bea425]" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/dashboard/transactions">
+            <Card className="hover:shadow-2xl transition-all cursor-pointer border-2 border-transparent hover:border-blue-500 bg-gradient-to-br from-blue-500 to-blue-700 text-white h-full">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">View History</h3>
+                    <p className="text-sm text-white/80">Track all your transactions</p>
+                  </div>
+                  <div className="h-16 w-16 rounded-full bg-white/10 flex items-center justify-center">
+                    <Receipt className="h-8 w-8" />
                   </div>
                 </div>
               </CardContent>
