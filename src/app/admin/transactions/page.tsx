@@ -35,7 +35,8 @@ interface Withdrawal {
   id: string;
   amount: number;
   status: string;
-  dimeBankDetails: string;
+  dimeBankAccountNumber: string;
+  dimeBankAccountName: string;
   createdAt: string;
   user: {
     name: string;
@@ -324,65 +325,62 @@ export default function AdminTransactionsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {pendingWithdrawals.map((withdrawal) => {
-                      const dimeDetails = JSON.parse(withdrawal.dimeBankDetails);
-                      return (
-                        <div key={withdrawal.id} className="border rounded-lg p-4 bg-orange-50">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-semibold">{withdrawal.user.name}</h3>
-                                <span className="px-2 py-0.5 text-xs bg-orange-200 text-orange-800 rounded">Pending</span>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-2">{withdrawal.user.email}</p>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div>
-                                  <p className="text-gray-600">Amount</p>
-                                  <p className="font-semibold text-orange-600">{formatCurrency(withdrawal.amount)}</p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-600">User Balance</p>
-                                  <p className="font-semibold">{formatCurrency(withdrawal.user.balance)}</p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-600">Account Number</p>
-                                  <p className="font-mono text-xs">{dimeDetails.accountNumber}</p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-600">Account Name</p>
-                                  <p className="font-semibold">{dimeDetails.accountName}</p>
-                                </div>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-2">{formatDateTime(withdrawal.createdAt)}</p>
+                    {pendingWithdrawals.map((withdrawal) => (
+                      <div key={withdrawal.id} className="border rounded-lg p-4 bg-orange-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{withdrawal.user.name}</h3>
+                              <span className="px-2 py-0.5 text-xs bg-orange-200 text-orange-800 rounded">Pending</span>
                             </div>
-                            <div className="flex gap-2 ml-4">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="text-green-600 hover:text-green-700"
-                                onClick={() => {
-                                  setSelectedItem(withdrawal);
-                                  setShowDetails(true);
-                                }}
-                                disabled={isProcessing}
-                              >
-                                <Send className="h-4 w-4 mr-1" />
-                                Process
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={() => handleProcessWithdrawal(withdrawal.id, false)}
-                                disabled={isProcessing}
-                              >
-                                <XCircle className="h-4 w-4" />
-                              </Button>
+                            <p className="text-sm text-gray-600 mb-2">{withdrawal.user.email}</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-600">Amount</p>
+                                <p className="font-semibold text-orange-600">{formatCurrency(withdrawal.amount)}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">User Balance</p>
+                                <p className="font-semibold">{formatCurrency(withdrawal.user.balance)}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">Account Number</p>
+                                <p className="font-mono text-xs">{withdrawal.dimeBankAccountNumber}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">Account Name</p>
+                                <p className="font-semibold">{withdrawal.dimeBankAccountName}</p>
+                              </div>
                             </div>
+                            <p className="text-xs text-gray-600 mt-2">{formatDateTime(withdrawal.createdAt)}</p>
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="text-green-600 hover:text-green-700"
+                              onClick={() => {
+                                setSelectedItem(withdrawal);
+                                setShowDetails(true);
+                              }}
+                              disabled={isProcessing}
+                            >
+                              <Send className="h-4 w-4 mr-1" />
+                              Process
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleProcessWithdrawal(withdrawal.id, false)}
+                              disabled={isProcessing}
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                     {pendingWithdrawals.length === 0 && (
                       <p className="text-center text-gray-600 py-8">No pending withdrawals</p>
                     )}
@@ -483,15 +481,10 @@ export default function AdminTransactionsPage() {
                   <>
                     <div className="space-y-2">
                       <Label>Dime Bank Details</Label>
-                      {(() => {
-                        const details = JSON.parse(selectedItem.dimeBankDetails);
-                        return (
-                          <div className="p-3 bg-gray-50 rounded">
-                            <p className="text-sm"><strong>Account Number:</strong> {details.accountNumber}</p>
-                            <p className="text-sm"><strong>Account Name:</strong> {details.accountName}</p>
-                          </div>
-                        );
-                      })()}
+                      <div className="p-3 bg-gray-50 rounded">
+                        <p className="text-sm"><strong>Account Number:</strong> {selectedItem.dimeBankAccountNumber}</p>
+                        <p className="text-sm"><strong>Account Name:</strong> {selectedItem.dimeBankAccountName}</p>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Processing Note (Optional)</Label>
