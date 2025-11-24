@@ -16,7 +16,7 @@ export default function Navbar() {
                 <span className="text-white font-bold text-lg">I</span>
               </div>
               <span className="text-xl font-bold text-white">
-                InvestPro
+                crestcat
               </span>
             </Link>
 

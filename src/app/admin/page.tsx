@@ -106,55 +106,63 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-[#bea425]" />
+            <CardTitle className="text-sm font-medium text-gray-600">Total Users</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+              <Users className="h-5 w-5 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
-            <p className="text-xs text-gray-600 mt-1">Registered users</p>
+            <div className="text-3xl font-bold text-gray-900">{stats?.totalUsers || 0}</div>
+            <p className="text-xs text-blue-600 mt-2">Registered users</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-green-50 border-2 border-green-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Volume</CardTitle>
-            <DollarSign className="h-4 w-4 text-[#bea425]" />
+            <CardTitle className="text-sm font-medium text-gray-600">Total Volume</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats?.totalVolume || 0)}</div>
-            <p className="text-xs text-gray-600 mt-1">All-time platform volume</p>
+            <div className="text-3xl font-bold text-gray-900">{formatCurrency(stats?.totalVolume || 0)}</div>
+            <p className="text-xs text-green-600 mt-2">All-time platform volume</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-yellow-50 border-2 border-yellow-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Investments</CardTitle>
-            <Clock className="h-4 w-4 text-[#bea425]" />
+            <CardTitle className="text-sm font-medium text-gray-600">Pending Investments</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#bea425] to-[#d4b942] flex items-center justify-center">
+              <Clock className="h-5 w-5 text-black" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#bea425]">{stats?.pendingInvestments || 0}</div>
-            <p className="text-xs text-gray-600 mt-1">Awaiting approval</p>
+            <div className="text-3xl font-bold text-[#bea425]">{stats?.pendingInvestments || 0}</div>
+            <p className="text-xs text-[#bea425] mt-2">Awaiting approval</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Withdrawals</CardTitle>
-            <TrendingUp className="h-4 w-4 text-[#bea425]" />
+            <CardTitle className="text-sm font-medium text-gray-600">Pending Withdrawals</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#bea425]">{stats?.pendingWithdrawals || 0}</div>
-            <p className="text-xs text-gray-600 mt-1">Awaiting processing</p>
+            <div className="text-3xl font-bold text-purple-600">{stats?.pendingWithdrawals || 0}</div>
+            <p className="text-xs text-purple-600 mt-2">Awaiting processing</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
+          <Card className="lg:col-span-2 bg-white shadow-lg border-2 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b">
               <CardTitle>Platform Activity (Last 7 Days)</CardTitle>
               <CardDescription>Investment and withdrawal trends</CardDescription>
             </CardHeader>
@@ -182,8 +190,8 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
+          <Card className="bg-white shadow-lg border-2 border-gray-200">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b">
               <CardTitle>Transaction Distribution</CardTitle>
               <CardDescription>Current status breakdown</CardDescription>
             </CardHeader>
@@ -212,8 +220,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <Card>
-          <CardHeader>
+        <Card className="bg-white shadow-lg border-2 border-gray-200">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b">
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Latest platform transactions and events</CardDescription>
           </CardHeader>

@@ -38,6 +38,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email is verified
+
+    // Check if user is disabled
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: 'Your account has been suspended. Please contact support.', suspended: true },
+        { status: 403 }
+      );
+    }
+
+    // Check if email is verified
     if (!user.emailVerified) {
       return NextResponse.json(
         { error: 'Please verify your email first', needsVerification: true },

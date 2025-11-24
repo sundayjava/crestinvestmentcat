@@ -1,11 +1,6 @@
 import 'dotenv/config';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/lib/prisma';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
 
 async function main() {
   console.log('🌱 Starting database seed...');
@@ -13,10 +8,10 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('Admin@123456', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@investpro.com' },
+    where: { email: 'admin@crestcat.com' },
     update: {},
     create: {
-      email: 'admin@investpro.com',
+      email: 'admin@crestcat.com',
       name: 'Admin User',
       password: adminPassword,
       role: 'ADMIN',
@@ -223,7 +218,7 @@ async function main() {
           qrCode: '/qr/usdt.png',
         },
         bank: {
-          name: 'InvestPro Bank',
+          name: 'crestcat Bank',
           accountNumber: '1234567890',
           routingNumber: '987654321',
         },
@@ -233,9 +228,56 @@ async function main() {
   });
   console.log('✓ System settings created');
 
+  // Create default deposit methods
+  await prisma.systemSettings.upsert({
+    where: { key: 'depositMethods' },
+    update: {},
+    create: {
+      key: 'depositMethods',
+      value: JSON.parse(JSON.stringify([
+        {
+          id: 'usdt-trc20',
+          name: 'USDT (TRC20)',
+          isActive: true,
+          accountDetails: {
+            label: 'USDT (TRC20) Address',
+            address: 'TXYZa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5',
+            network: 'TRC20',
+            instructions: 'Send USDT to the address above using TRC20 network only. Copy transaction ID after sending.'
+          }
+        },
+        {
+          id: 'bank-transfer',
+          name: 'Bank Transfer',
+          isActive: true,
+          accountDetails: {
+            bankName: 'crestcat Bank',
+            accountNumber: '1234567890',
+            accountName: 'Crest Investment',
+            routingNumber: '987654321',
+            swiftCode: 'INVPZAJJ',
+            branchCode: '250655',
+            instructions: 'Use your email as reference when making the transfer.'
+          }
+        },
+        {
+          id: 'paypal',
+          name: 'PayPal',
+          isActive: true,
+          accountDetails: {
+            email: 'payments@crestinvestment.com',
+            instructions: 'Send payment to the email above and include your registered email in the notes.'
+          }
+        }
+      ])),
+      description: 'Available deposit methods and account details for investments'
+    }
+  });
+  console.log('✓ Default deposit methods created');
+
   console.log('✅ Database seeding completed!');
   console.log('\n📝 Test Credentials:');
-  console.log('Admin: admin@investpro.com / Admin@123456');
+  console.log('Admin: admin@crestcat.com / Admin@123456');
   console.log('User:  user@test.com / User@123456');
 }
 

@@ -7,7 +7,7 @@ const testimonials = [
     name: 'Sarah Johnson',
     role: 'Investment Consultant',
     image: '/testimonial/001.jpeg',
-    content: 'InvestPro has transformed how I manage my portfolio. The real-time analytics and professional support are unmatched.',
+    content: 'crestcat has transformed how I manage my portfolio. The real-time analytics and professional support are unmatched.',
     rating: 5,
   },
   {
@@ -35,21 +35,21 @@ const testimonials = [
     name: 'Jessica Martinez',
     role: 'Real Estate Investor',
     image: '/testimonial/005.jpg',
-    content: 'From gold to crypto, InvestPro makes it simple to invest across different asset classes. Highly recommend!',
+    content: 'From gold to crypto, crestcat makes it simple to invest across different asset classes. Highly recommend!',
     rating: 5,
   },
   {
     name: 'Robert Anderson',
     role: 'Tech Executive',
     image: '/testimonial/006.jpg',
-    content: 'Professional, reliable, and user-friendly. InvestPro has exceeded all my expectations for an investment platform.',
+    content: 'Professional, reliable, and user-friendly. crestcat has exceeded all my expectations for an investment platform.',
     rating: 5,
   },
   {
     name: 'Amanda Wilson',
     role: 'Portfolio Manager',
     image: '/testimonial/4528cb3ab377507ad14f803b125e7937.jpg',
-    content: 'The instant transactions and dedicated support make InvestPro stand out. My clients love the platform too!',
+    content: 'The instant transactions and dedicated support make crestcat stand out. My clients love the platform too!',
     rating: 5,
   },
 ];

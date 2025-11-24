@@ -12,13 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2, CheckCircle, Copy } from 'lucide-react';
+import { X, Loader2, CheckCircle, Copy } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 const schema = yup.object({
   assetId: yup.string().required('Please select an asset'),
   amount: yup.number().positive('Amount must be positive').required('Amount is required'),
-  depositMethod: yup.string().required('Please select a deposit method'),
+  depositMethod: yup.string().default(''),
   depositProof: yup.string().default(''),
 });
 
@@ -29,12 +29,14 @@ export default function InvestPage() {
   const { user, isHydrated } = useAuthStore();
   const { assets, setAssets } = useAssetsStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); 
   const [success, setSuccess] = useState(false);
   const [receiptId, setReceiptId] = useState('');
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [showDepositDetails, setShowDepositDetails] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [depositMethods, setDepositMethods] = useState<any[]>([]);
+  const [selectedDepositMethod, setSelectedDepositMethod] = useState<any>(null);
 
   const {
     register,
@@ -48,6 +50,7 @@ export default function InvestPage() {
 
   const watchAssetId = watch('assetId');
   const watchAmount = watch('amount');
+  const watchDepositMethod = watch('depositMethod');
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -57,6 +60,7 @@ export default function InvestPage() {
       return;
     }
     fetchAssets();
+    fetchDepositMethods();
   }, [user, isHydrated]);
 
   useEffect(() => {
@@ -66,6 +70,13 @@ export default function InvestPage() {
     }
   }, [watchAssetId, assets]);
 
+  useEffect(() => {
+    if (watchDepositMethod) {
+      const method = depositMethods.find(m => m.id === watchDepositMethod);
+      setSelectedDepositMethod(method);
+    }
+  }, [watchDepositMethod, depositMethods]);
+
   const fetchAssets = async () => {
     try {
       const response = await fetch('/api/assets');
@@ -73,6 +84,17 @@ export default function InvestPage() {
       setAssets(data.assets);
     } catch (error) {
       console.error('Error fetching assets:', error);
+    }
+  };
+
+  const fetchDepositMethods = async () => {
+    try {
+      const response = await fetch('/api/admin/deposit-methods');
+      const data = await response.json();
+      const activeMethods = (data.depositMethods || []).filter((m: any) => m.isActive);
+      setDepositMethods(activeMethods);
+    } catch (error) {
+      console.error('Error fetching deposit methods:', error);
     }
   };
 
@@ -97,7 +119,12 @@ export default function InvestPage() {
       return;
     }
 
-    // Second step: Submit to database
+    // Second step: Validate deposit method and submit to database
+    if (!data.depositMethod) {
+      setError('Please select a deposit method');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -169,9 +196,8 @@ export default function InvestPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-3xl mx-auto py-8">
-        <Link href="/dashboard" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+        <Link href="/dashboard" className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 mb-6 transition-colors">
+          <X className="h-5 w-5" />
         </Link>
 
         <Card>
@@ -284,46 +310,59 @@ export default function InvestPage() {
                       disabled={isLoading}
                     >
                       <option value="">Select method...</option>
-                      <option value="USDT">USDT (TRC20)</option>
-                      <option value="Bank Transfer">Bank Transfer</option>
-                      <option value="Other">Other</option>
+                      {depositMethods.map((method) => (
+                        <option key={method.id} value={method.id}>
+                          {method.name}
+                        </option>
+                      ))}
                     </select>
                     {errors.depositMethod && (
                       <p className="text-xs text-red-600">{errors.depositMethod.message}</p>
                     )}
                   </div>
 
-                  <div className="p-4 bg-[#bea425]/10 border border-[#bea425] rounded-lg space-y-3">
-                    <h4 className="font-semibold">Deposit Account Details</h4>
-                    
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">USDT (TRC20) Address:</p>
-                      <div className="flex gap-2">
-                        <code className="flex-1 p-2 bg-white rounded text-xs">TXYZa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5</code>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleCopy('TXYZa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5')}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                  {selectedDepositMethod && (
+                    <div className="p-4 bg-[#bea425]/10 border border-[#bea425] rounded-lg space-y-3">
+                      <h4 className="font-semibold">{selectedDepositMethod.name} - Account Details</h4>
+                      
+                      {selectedDepositMethod.accountDetails.instructions && (
+                        <p className="text-sm text-gray-600">
+                          {selectedDepositMethod.accountDetails.instructions}
+                        </p>
+                      )}
 
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Bank Account:</p>
-                      <div className="text-xs space-y-1">
-                        <p>Bank Name: InvestPro Bank</p>
-                        <p>Account Number: 1234567890</p>
-                        <p>Routing Number: 987654321</p>
+                      <div className="space-y-3">
+                        {Object.entries(selectedDepositMethod.accountDetails).map(([key, value]) => {
+                          if (key === 'instructions' || !value) return null;
+                          
+                          return (
+                            <div key={key} className="space-y-1">
+                              <p className="text-sm font-medium capitalize">
+                                {key.replace(/([A-Z])/g, ' $1').trim()}:
+                              </p>
+                              <div className="flex gap-2">
+                                <code className="flex-1 p-2 bg-white rounded text-xs break-all">
+                                  {value as string}
+                                </code>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleCopy(value as string)}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
 
-                    {copied && (
-                      <p className="text-xs text-[#bea425]">✓ Copied to clipboard!</p>
-                    )}
-                  </div>
+                      {copied && (
+                        <p className="text-xs text-[#bea425]">✓ Copied to clipboard!</p>
+                      )}
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="depositProof">Deposit Proof (Transaction ID or Screenshot URL)</Label>

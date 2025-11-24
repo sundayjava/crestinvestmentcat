@@ -162,11 +162,21 @@ model Investment {
   depositMethod   String?  // USDT, Bank Transfer, etc.
   
   isActive        Boolean  @default(true)
+  
+  // Closure fields
+  closureRequested    Boolean   @default(false)
+  closureRequestedAt  DateTime?
+  closedAt            DateTime?
+  closureApprovedBy   String?   // Admin user ID
+  closureRejectedAt   DateTime?
+  closureNotes        String?   // Admin notes on closure
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
   @@index([userId])
   @@index([assetId])
+  @@index([closureRequested])
 }
 
 model Transaction {

@@ -102,6 +102,24 @@
   }
 }
 
+/* Marquee animation for crypto ticker */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 .animate-scroll {
   animation: scroll 40s linear infinite;
 }

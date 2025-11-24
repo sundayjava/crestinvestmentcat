@@ -111,7 +111,7 @@ export default function RegisterPage() {
         <div className="space-y-1 pb-6">
           <h1 className="text-3xl font-bold text-gray-900">Create your account</h1>
           <p className="text-base text-gray-600">
-            Fill in your details to get started with InvestPro
+            Fill in your details to get started with CrestCat
           </p>
         </div>
         

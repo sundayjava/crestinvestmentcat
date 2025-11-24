@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       {
         id: '1',
         type: 'EMAIL',
-        subject: 'Welcome to InvestPro',
+        subject: 'Welcome to CrestCat',
         message: 'Thank you for joining our platform',
         recipient: 'all',
         status: 'SENT',

@@ -1,4 +1,4 @@
-# InvestPro - Professional Investment Platform
+# crestcat - Professional Investment Platform
 
 A comprehensive, industrial-standard investment platform built with Next.js 16, TypeScript, Prisma, and Zustand. This platform allows users to invest in various assets (gold, silver, crypto, real estate) with real-time analytics, admin management, and automated email notifications.
 
@@ -85,7 +85,7 @@ UPLOAD_DIR="./public/uploads"
 MAX_FILE_SIZE=5242880
 
 # App Settings
-NEXT_PUBLIC_APP_NAME="InvestPro"
+NEXT_PUBLIC_APP_NAME="crestcat"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
@@ -115,7 +115,7 @@ Visit `http://localhost:3000` to see the landing page.
 After seeding the database, use these credentials:
 
 **Admin Account:**
-- Email: `admin@investpro.com`
+- Email: `admin@crestcat.com`
 - Password: `Admin@123456`
 
 **Test User Account:**

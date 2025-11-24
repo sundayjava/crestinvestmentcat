@@ -1,6 +1,6 @@
 # 🚀 IMPLEMENTATION GUIDE
 
-This document provides a step-by-step guide to complete the remaining pages and functionality for the InvestPro platform.
+This document provides a step-by-step guide to complete the remaining pages and functionality for the crestcat platform.
 
 ## ✅ What's Already Built
 

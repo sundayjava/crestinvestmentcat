@@ -120,7 +120,7 @@ npm run dev
 Visit http://localhost:3000
 
 ### 3. Test Credentials (after seeding)
-- **Admin**: admin@investpro.com / Admin@123456
+- **Admin**: admin@crestcat.com / Admin@123456
 - **User**: user@test.com / User@123456
 
 ## 📂 Project Files Created

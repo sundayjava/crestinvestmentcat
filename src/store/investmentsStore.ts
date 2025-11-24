@@ -17,6 +17,9 @@ interface Investment {
   depositProof?: string;
   depositMethod?: string;
   isActive: boolean;
+  closureRequested?: boolean;
+  closureRequestedAt?: string;
+  closedAt?: string;
   createdAt: string;
 }
 

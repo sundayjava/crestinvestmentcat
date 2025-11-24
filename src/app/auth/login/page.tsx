@@ -88,7 +88,7 @@ export default function LoginPage() {
             <div className="h-12 w-12 bg-[#bea425] rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-2xl">I</span>
             </div>
-            <span className="text-3xl font-bold text-white">InvestPro</span>
+            <span className="text-3xl font-bold text-white">CrestCat</span>
           </div>
 
           {/* Quote */}
@@ -103,7 +103,7 @@ export default function LoginPage() {
                 </p>
                 <footer className="text-xl text-gray-400 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-[#bea425]" />
-                  <span>— InvestPro</span>
+                  <span>— CrestCat</span>
                 </footer>
               </blockquote>
             </div>
@@ -142,7 +142,7 @@ export default function LoginPage() {
             <CardHeader className="space-y-1 pb-6">
               <CardTitle className="text-3xl font-bold text-gray-900">Welcome back</CardTitle>
               <CardDescription className="text-base">
-                Sign in to your InvestPro account
+                Sign in to your CrestCat account
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -213,7 +213,7 @@ export default function LoginPage() {
             <div className="h-8 w-8 bg-[#bea425] rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">I</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">InvestPro</span>
+            <span className="text-xl font-bold text-gray-900">CrestCat</span>
           </div>
         </div>
       </div>

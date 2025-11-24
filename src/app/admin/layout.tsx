@@ -13,7 +13,9 @@ import {
   Bell, 
   LogOut,
   Menu,
-  X
+  X,
+  CreditCard,
+  PieChart
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -23,8 +25,10 @@ interface AdminLayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Investments', href: '/admin/investments', icon: PieChart },
   { name: 'Transactions', href: '/admin/transactions', icon: TrendingUp },
   { name: 'Assets', href: '/admin/assets', icon: DollarSign },
+  { name: 'Deposit Methods', href: '/admin/deposit-methods', icon: CreditCard },
   { name: 'Notifications', href: '/admin/notifications', icon: Bell },
 ];
 
@@ -84,7 +88,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <span className="text-white font-bold text-xl">I</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">InvestPro</h1>
+                <h1 className="text-xl font-bold text-white">CrestCat</h1>
                 <p className="text-xs text-[#bea425]">Admin Panel</p>
               </div>
             </div>
@@ -152,7 +156,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <div className="h-8 w-8 bg-[#bea425] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold">I</span>
               </div>
-              <span className="font-bold text-black">InvestPro Admin</span>
+              <span className="font-bold text-black">CrestCat Admin</span>
             </div>
             <div className="w-6" />
           </div>

@@ -124,17 +124,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
+    // If userId is provided, fetch for that user only
+    // If not, fetch all investments (for admin)
     const investments = await prisma.investment.findMany({
-      where: { userId },
+      where: userId ? { userId } : {},
       include: {
-        asset: true,
+        asset: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+            currentPrice: true,
+            description: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });

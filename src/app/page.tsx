@@ -81,7 +81,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose InvestPro
+              Why Choose CrestCat
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Everything you need to invest smartly and securely
@@ -115,7 +115,7 @@ export default function Home() {
             Ready to Start Your Investment Journey?
           </h2>
           <p className="text-lg text-purple-100 mb-8">
-            Join thousands of investors growing their wealth with InvestPro
+            Join thousands of investors growing their wealth with CrestCat
           </p>
           <Link href="/auth/register">
             <Button size="lg" variant="secondary" className="bg-white text-black hover:bg-gray-100">
@@ -135,7 +135,7 @@ export default function Home() {
                 <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
                   <span className="text-[#bea425] font-bold">I</span>
                 </div>
-                <span className="text-lg font-bold text-white">InvestPro</span>
+                <span className="text-lg font-bold text-white">CrestCat</span>
               </div>
               <p className="text-sm">
                 Professional investment platform for modern investors.
@@ -167,7 +167,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} InvestPro. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} CrestCat. All rights reserved.</p>
           </div>
         </div>
       </footer>
